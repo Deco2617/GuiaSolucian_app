@@ -1,11 +1,11 @@
 package com.example.guiasolucion_app;
 
-import android.content.Intent; // Importa Intent para la navegación
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast; // Importa Toast para mostrar mensajes
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,9 +15,14 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    // 1. Declara las variables para los componentes de la UI
+    // 1. Declara los componentes y los arreglos
     EditText editTextEmail, editTextPassword;
     Button buttonLogin;
+
+    // Arreglos para almacenar los usuarios válidos
+    // La contraseña en la posición 'i' corresponde al correo en la posición 'i'
+    private String[] validEmails = {"admin@ari.com", "tecnico@ari.com", "gerente@ari.com"};
+    private String[] validPasswords = {"admin123", "tecnico123", "gerente123"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,59 +30,63 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // El código de los insets se mantiene igual
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // 2. Vincula las variables con los componentes del XML por su ID
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
 
-        // 3. Configura el listener para el evento de clic en el botón
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Llama al método que contiene la lógica de login
                 loginUser();
             }
         });
     }
 
     /**
-     * Método para manejar la lógica de inicio de sesión.
+     * Método para manejar la lógica de inicio de sesión usando arreglos.
      */
+    // Reemplaza este método en tu MainActivity.java
+
     private void loginUser() {
-        // 4. Obtiene el texto de los campos de email y contraseña
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-        // 5. Realiza una validación simple
-        if (email.isEmpty()) {
-            Toast.makeText(this, "Por favor, ingrese su correo electrónico", Toast.LENGTH_SHORT).show();
-            return; // Detiene la ejecución si el campo está vacío
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Por favor, complete ambos campos", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        if (password.isEmpty()) {
-            Toast.makeText(this, "Por favor, ingrese su contraseña", Toast.LENGTH_SHORT).show();
-            return; // Detiene la ejecución si el campo está vacío
+        boolean loginSuccessful = false;
+        for (int i = 0; i < validEmails.length; i++) {
+            if (email.equalsIgnoreCase(validEmails[i]) && password.equals(validPasswords[i])) {
+                loginSuccessful = true;
+                break;
+            }
         }
 
-        // 6. Simula una autenticación (en un caso real, aquí llamarías a tu API o base de datos)
-        if (email.equals("usuario@ari.com") && password.equals("123456")) {
-            // Si las credenciales son correctas
-            Toast.makeText(this, "¡Login exitoso!", Toast.LENGTH_LONG).show();
+        if (loginSuccessful) {
+            Toast.makeText(this, "¡Login exitoso!", Toast.LENGTH_SHORT).show();
 
-            // Aquí iría el código para navegar a la siguiente pantalla (por ejemplo, SeleccionIncidenteActivity)
-            // Intent intent = new Intent(MainActivity.this, SeleccionIncidenteActivity.class);
-            // startActivity(intent);
-            // finish(); // Opcional: cierra la actividad de login para que el usuario no pueda volver con el botón de atrás
+            // ---  LA SOLUCIÓN A LA SUPERPOSICIÓN ---
+
+            // 1. Oculta el grupo de vistas de login
+            findViewById(R.id.login_group).setVisibility(View.GONE);
+
+            // 2. Muestra el contenedor de fragmentos
+            findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
+
+            // 3. Carga el fragmento como ya lo hacías
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new SeleccionIncidenteFragment())
+                    .commit();
 
         } else {
-            // Si las credenciales son incorrectas
             Toast.makeText(this, "Correo o contraseña incorrectos.", Toast.LENGTH_LONG).show();
         }
     }

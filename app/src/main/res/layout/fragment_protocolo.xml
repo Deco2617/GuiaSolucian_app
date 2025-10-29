@@ -5,20 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white_smoke"
-    tools:context=".ProtocoloFragment">
+    tools:context=".Protocolo_Fragment">
 
     <TextView
         android:id="@+id/textViewProtocoloTitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Protocolo: Falla Eléctrica General"
         android:textColor="@color/crimson"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Protocolo: Falla Eléctrica General" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardViewTimer"
@@ -52,10 +52,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="00:08:15"
                 android:textColor="@color/white"
                 android:textSize="34sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="00:08:15" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -79,19 +79,34 @@
         android:id="@+id/buttonMarcarResuelto"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
         android:paddingVertical="14dp"
-        android:text="Marcar Incidente como Resuelto"
+        android:text="Resuelto"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:backgroundTint="@color/mediumPurple"
         app:cornerRadius="24dp"
         app:icon="@android:drawable/ic_menu_save"
-        app:iconGravity="textStart"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/buttonCancelar" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonCancelar"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="8dp"
+        android:paddingVertical="14dp"
+        android:text="Cancelar"
+        android:textAllCaps="false"
+        app:cornerRadius="24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/buttonMarcarResuelto"
+        app:layout_constraintEnd_toStartOf="@+id/buttonMarcarResuelto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/buttonMarcarResuelto" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
