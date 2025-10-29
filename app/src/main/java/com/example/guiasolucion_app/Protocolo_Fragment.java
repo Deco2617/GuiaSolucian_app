@@ -100,9 +100,6 @@ public class Protocolo_Fragment extends Fragment implements ProtocoloAdapter.OnP
             Date fechaFin = new Date();
             long duracionMillis = fechaFin.getTime() - fechaInicio.getTime();
 
-            // Mensaje de depuración para ver el tamaño de la bitácora
-            Toast.makeText(getContext(), "Enviando " + bitacora.size() + " acciones al informe.", Toast.LENGTH_LONG).show();
-
             int seconds = (int) (duracionMillis / 1000);
             int minutes = seconds / 60;
             int hours = minutes / 60;
@@ -132,8 +129,6 @@ public class Protocolo_Fragment extends Fragment implements ProtocoloAdapter.OnP
 
     @Override
     public void onPasoChecked(PasoProtocolo paso) {
-        Toast.makeText(getContext(), "Check detectado: " + paso.getTitulo(), Toast.LENGTH_SHORT).show();
-
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
         String horaActual = sdf.format(new Date());
 
@@ -152,15 +147,36 @@ public class Protocolo_Fragment extends Fragment implements ProtocoloAdapter.OnP
         switch (titulo) {
             case "Falla Eléctrica General":
                 pasos.add(new PasoProtocolo("Verificar fuente de alimentación", "Responsable: Equipo Técnico"));
-                pasos.add(new PasoProtocolo("Inspeccionar tableros de control", "Responsable: Jefe de Operaciones"));
-                pasos.add(new PasoProtocolo("Notificar a equipo de mantenimiento", "Responsable: Administración"));
-                pasos.add(new PasoProtocolo("Activar generador de respaldo", "Responsable: Equipo de Seguridad"));
-                pasos.add(new PasoProtocolo("Comunicar estado a la gerencia", "Responsable: Gerente General"));
+                pasos.add(new PasoProtocolo("Inspeccionar tableros de control", "Responsable: Jefe de TI"));
+                pasos.add(new PasoProtocolo("Notificar a equipo de mantenimiento", "Responsable: Administrativos"));
+                pasos.add(new PasoProtocolo("Activar generador de respaldo", "Responsable: Equipo de Técnico"));
+                pasos.add(new PasoProtocolo("Comunicar estado a la gerencia", "Responsable: Administrativos"));
                 break;
             case "Caída de Red / Internet":
-                pasos.add(new PasoProtocolo("Revisar conexión del router principal", "Responsable: Soporte TI"));
-                pasos.add(new PasoProtocolo("Contactar al proveedor de servicios (ISP)", "Responsable: Administración"));
-                pasos.add(new PasoProtocolo("Informar a los usuarios sobre la interrupción", "Responsable: Jefe de Operaciones"));
+                pasos.add(new PasoProtocolo("Verificación Física Inicial", "Responsable: Soporte TI"));
+                pasos.add(new PasoProtocolo("Reinicio de Equipos Clave (Módem/Router)", "Responsable: Soporte TI"));
+                pasos.add(new PasoProtocolo("Diagnóstico Interno (Ping a servidor local)", "Responsable: Soporte TI"));
+                pasos.add(new PasoProtocolo("Consultar Estado del Proveedor (ISP)", "Responsable: Administración"));
+                pasos.add(new PasoProtocolo("Comunicación Inicial a Jefatura", "Responsable: Soporte TI"));
+                pasos.add(new PasoProtocolo("Contacto con Soporte del Proveedor (ISP)", "Responsable: Administración"));
+                pasos.add(new PasoProtocolo("Verificar Restauración del Servicio", "Responsable: Soporte TI"));
+                break;
+            case "Incidente de Seguridad":
+                pasos.add(new PasoProtocolo("Identificación y Reporte Inmediato", "Responsable: Jefe de TI"));
+                pasos.add(new PasoProtocolo("Aislar Equipo(s) Afectado(s) de la Red", "Responsable: Equipo Técnico"));
+                pasos.add(new PasoProtocolo("Cambiar Credenciales Comprometidas", "Responsable: Admin. de Red"));
+                pasos.add(new PasoProtocolo("Análisis y Escaneo Forense", "Responsable: Jefe de TI"));
+                pasos.add(new PasoProtocolo("Erradicación de la Amenaza (Limpieza/Formateo)", "Responsable: Equipo Técnico"));
+                pasos.add(new PasoProtocolo("Restaurar Datos desde Copia de Seguridad", "Responsable: Admin. de Red"));
+                pasos.add(new PasoProtocolo("Reconectar y Monitorear Equipo", "Responsable: Admin. de Red"));
+                break;
+            case "Falla de Servidor Crítico":
+                pasos.add(new PasoProtocolo("Confirmación de la Alerta de Caída", "Responsable: Jefe de TI"));
+                pasos.add(new PasoProtocolo("Diagnóstico de Conectividad (Ping al Servidor)", "Responsable: Admin. de Red"));
+                pasos.add(new PasoProtocolo("Intento de Acceso Remoto", "Responsable: Admin. de Red"));
+                pasos.add(new PasoProtocolo("Acceso Físico al Servidor (Data Center)", "Responsable: Equipo Técnico"));
+                pasos.add(new PasoProtocolo("Ejecutar Plan de Restauración desde Backup", "Responsable: Admin. de Red"));
+                pasos.add(new PasoProtocolo("Validación del Servicio", "Responsable: Jefe de TI"));
                 break;
             default:
                 pasos.add(new PasoProtocolo("No se encontraron pasos", "Verifique la configuración del protocolo."));

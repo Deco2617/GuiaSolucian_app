@@ -51,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void inicializarUsuarios() {
-        listaUsuarios.add(new Usuario("Carlos Mendoza", "Fiscal Superior (Directivo)", "fiscal@ari.com", "fiscal123"));
-        listaUsuarios.add(new Usuario("Ana Sánchez", "Gerente Administrativo (Gerencial)", "gerente@ari.com", "gerente123"));
         listaUsuarios.add(new Usuario("Juan Pérez", "Jefe de TI (Operativo)", "jefeti@ari.com", "jefeti123"));
         listaUsuarios.add(new Usuario("Maria Rodríguez", "Admin. de Red (Operativo)", "adminred@ari.com", "adminred123"));
         listaUsuarios.add(new Usuario("Luis Gonzales", "Equipo Técnico (Operativo)", "tecnico@ari.com", "tecnico123"));

@@ -15,7 +15,7 @@ public class AccionBitacora implements Parcelable {
         this.descripcion = descripcion;
     }
 
-    // --- ESTA SECCIÓN ES CRUCIAL PARA GUARDAR EL ESTADO ---
+    // --- ESTA SECCIÓN ES CRUCIAL PARA QUE ANDROID PUEDA GUARDAR Y RESTAURAR LA LISTA ---
     protected AccionBitacora(Parcel in) {
         hora = in.readString();
         rol = in.readString();
