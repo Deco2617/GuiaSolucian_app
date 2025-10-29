@@ -13,6 +13,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     // 1. Declara los componentes y los arreglos
@@ -21,9 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Arreglos para almacenar los usuarios válidos
     // La contraseña en la posición 'i' corresponde al correo en la posición 'i'
-    private String[] validEmails = {"admin@ari.com", "tecnico@ari.com", "gerente@ari.com"};
-    private String[] validPasswords = {"admin123", "tecnico123", "gerente123"};
-
+    private List<Usuario> listaUsuarios = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        // Inicializamos la lista de usuarios
+        inicializarUsuarios();
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
@@ -48,6 +50,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void inicializarUsuarios() {
+        listaUsuarios.add(new Usuario("Carlos Mendoza", "Fiscal Superior (Directivo)", "fiscal@ari.com", "fiscal123"));
+        listaUsuarios.add(new Usuario("Ana Sánchez", "Gerente Administrativo (Gerencial)", "gerente@ari.com", "gerente123"));
+        listaUsuarios.add(new Usuario("Juan Pérez", "Jefe de TI (Operativo)", "jefeti@ari.com", "jefeti123"));
+        listaUsuarios.add(new Usuario("Maria Rodríguez", "Admin. de Red (Operativo)", "adminred@ari.com", "adminred123"));
+        listaUsuarios.add(new Usuario("Luis Gonzales", "Equipo Técnico (Operativo)", "tecnico@ari.com", "tecnico123"));
+    }
+
     /**
      * Método para manejar la lógica de inicio de sesión usando arreglos.
      */
@@ -57,31 +67,25 @@ public class MainActivity extends AppCompatActivity {
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Por favor, complete ambos campos", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // ... (validación de campos vacíos) ...
 
-        boolean loginSuccessful = false;
-        for (int i = 0; i < validEmails.length; i++) {
-            if (email.equalsIgnoreCase(validEmails[i]) && password.equals(validPasswords[i])) {
-                loginSuccessful = true;
+        Usuario usuarioLogueado = null;
+        for (Usuario usuario : listaUsuarios) {
+            if (usuario.getEmail().equalsIgnoreCase(email) && usuario.getPassword().equals(password)) {
+                usuarioLogueado = usuario;
                 break;
             }
         }
 
-        if (loginSuccessful) {
-            Toast.makeText(this, "¡Login exitoso!", Toast.LENGTH_SHORT).show();
+        if (usuarioLogueado != null) {
+            Toast.makeText(this, "Bienvenido, " + usuarioLogueado.getNombre(), Toast.LENGTH_SHORT).show();
 
-            // ---  LA SOLUCIÓN A LA SUPERPOSICIÓN ---
+            // Guardamos el usuario en nuestro Singleton
+            CurrentUser.getInstance().setUsuario(usuarioLogueado);
 
-            // 1. Oculta el grupo de vistas de login
+            // ... (tu código para ocultar el login y mostrar el fragment)
             findViewById(R.id.login_group).setVisibility(View.GONE);
-
-            // 2. Muestra el contenedor de fragmentos
             findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-
-            // 3. Carga el fragmento como ya lo hacías
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new SeleccionIncidenteFragment())
                     .commit();

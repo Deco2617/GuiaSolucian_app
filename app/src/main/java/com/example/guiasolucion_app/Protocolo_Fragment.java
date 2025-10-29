@@ -8,43 +8,38 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+public class Protocolo_Fragment extends Fragment implements ProtocoloAdapter.OnPasoClickListener {
 
-public class Protocolo_Fragment extends Fragment {
+    // --- Variables de estado que necesitamos guardar ---
+    private Date fechaInicio;
+    private ArrayList<AccionBitacora> bitacora;
+    // ---------------------------------------------
 
-    // --- Vistas de la UI ---
     private RecyclerView recyclerViewPasos;
     private TextView textViewTimer;
-
-    // --- Variables para el Cronómetro ---
     private Handler timerHandler = new Handler(Looper.getMainLooper());
     private Runnable timerRunnable;
     private long startTime = 0L;
-
-    // --- Variables para la lista ---
     private ProtocoloAdapter adapter;
     private List<PasoProtocolo> listaDePasos;
     private String tituloIncidente = "";
 
-    Button buttonCancelar;
-
-    // Constructor público vacío requerido
     public Protocolo_Fragment() {}
 
-    /**
-     * Método estático para crear una instancia del fragmento y pasarle argumentos.
-     * Esta es la forma recomendada de pasar datos a un fragmento.
-     */
-    public static Protocolo_Fragment newInstance(String titulo) { // ✅ AÑADE EL GUION BAJO
-        Protocolo_Fragment fragment = new Protocolo_Fragment(); // ✅ AÑADE EL GUION BAJO
+    public static Protocolo_Fragment newInstance(String titulo) {
+        Protocolo_Fragment fragment = new Protocolo_Fragment();
         Bundle args = new Bundle();
         args.putString("TITULO_INCIDENTE", titulo);
         fragment.setArguments(args);
@@ -54,7 +49,18 @@ public class Protocolo_Fragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Recibe el título desde los argumentos
+
+        // LÓGICA DE RESTAURACIÓN DE ESTADO
+        if (savedInstanceState != null) {
+            // Si hay un estado guardado, lo restauramos.
+            bitacora = savedInstanceState.getParcelableArrayList("bitacora_state");
+            fechaInicio = (Date) savedInstanceState.getSerializable("fecha_inicio_state");
+        } else {
+            // Si NO hay estado guardado (es la primera vez), creamos datos nuevos.
+            bitacora = new ArrayList<>();
+            fechaInicio = new Date();
+        }
+
         if (getArguments() != null) {
             tituloIncidente = getArguments().getString("TITULO_INCIDENTE");
         }
@@ -63,83 +69,90 @@ public class Protocolo_Fragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Infla el layout del fragmento
         return inflater.inflate(R.layout.fragment_protocolo, container, false);
     }
-
-
-
-
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Vincula las vistas
+        // Vinculación de vistas
         textViewTimer = view.findViewById(R.id.textViewTimer);
         recyclerViewPasos = view.findViewById(R.id.recyclerViewPasos);
-
-        // 1. Vincula el nuevo botón de cancelar
-        buttonCancelar = view.findViewById(R.id.buttonCancelar);
-
-        // 2. Configura el listener para el clic
-        buttonCancelar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 3. Llama a popBackStack para volver al fragmento anterior
-                if (getActivity() != null) {
-                    getActivity().getSupportFragmentManager().popBackStack();
-                }
-            }
-        });
-        // --- FIN DEL CÓDIGO A AÑADIR ---
         Button buttonMarcarResuelto = view.findViewById(R.id.buttonMarcarResuelto);
+        Button buttonCancelar = view.findViewById(R.id.buttonCancelar);
 
-        buttonMarcarResuelto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 1. Detenemos el cronómetro para que no siga corriendo
-                if (timerHandler != null && timerRunnable != null) {
-                    timerHandler.removeCallbacks(timerRunnable);
-                }
-
-                // 2. Obtenemos el tiempo final que muestra el TextView
-                String tiempoFinal = textViewTimer.getText().toString();
-
-                // 3. Creamos una instancia del nuevo fragmento de informe
-                InformeIncidenteFragment informeFragment = InformeIncidenteFragment.newInstance(tituloIncidente, tiempoFinal);
-
-                // 4. Realizamos la transacción para mostrar el fragmento del informe
-                if (getActivity() != null) {
-                    getActivity().getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, informeFragment)
-                            // No usamos addToBackStack para que el usuario no pueda "volver" al protocolo ya resuelto
-                            .commit();
-                }
-            }
-        });
-        // 1. Genera la lista de pasos dinámicamente
+        // Configuración del RecyclerView
         listaDePasos = generarPasosParaIncidente(tituloIncidente);
-
-        // 2. Configura el RecyclerView
+        adapter = new ProtocoloAdapter(listaDePasos, this);
         recyclerViewPasos.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new ProtocoloAdapter(listaDePasos);
         recyclerViewPasos.setAdapter(adapter);
 
-        // 3. Inicia el cronómetro
+        // Listeners de los botones
+        buttonCancelar.setOnClickListener(v -> {
+            if (getActivity() != null) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+
+        buttonMarcarResuelto.setOnClickListener(v -> {
+            if (timerHandler != null) timerHandler.removeCallbacks(timerRunnable);
+            Date fechaFin = new Date();
+            long duracionMillis = fechaFin.getTime() - fechaInicio.getTime();
+
+            // Mensaje de depuración para ver el tamaño de la bitácora
+            Toast.makeText(getContext(), "Enviando " + bitacora.size() + " acciones al informe.", Toast.LENGTH_LONG).show();
+
+            int seconds = (int) (duracionMillis / 1000);
+            int minutes = seconds / 60;
+            int hours = minutes / 60;
+            String tiempoFinalCalculado = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes % 60, seconds % 60);
+            // Este mensaje te dirá cuántos elementos tiene la lista ANTES de enviarla.
+            Toast.makeText(getContext(), "Enviando " + bitacora.size() + " acciones.", Toast.LENGTH_LONG).show();
+            InformeIncidenteFragment informe = InformeIncidenteFragment.newInstance(
+                    tituloIncidente, tiempoFinalCalculado, fechaInicio, fechaFin, bitacora, duracionMillis);
+
+            if (getActivity() != null) {
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, informe).commit();
+            }
+        });
+
         iniciarCronometro();
     }
 
-    /**
-     * Genera una lista de pasos específica basada en el título del incidente.
-     */
+    // --- MÉTODO PARA GUARDAR EL ESTADO ---
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Guardamos nuestras variables importantes aquí.
+        outState.putParcelableArrayList("bitacora_state", bitacora);
+        outState.putSerializable("fecha_inicio_state", fechaInicio);
+    }
+
+    @Override
+    public void onPasoChecked(PasoProtocolo paso) {
+        Toast.makeText(getContext(), "Check detectado: " + paso.getTitulo(), Toast.LENGTH_SHORT).show();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        String horaActual = sdf.format(new Date());
+
+        String descripcionCompleta = paso.getDescripcion();
+        String rol = "Usuario";
+        if (descripcionCompleta.contains("Responsable:")) {
+            try {
+                rol = descripcionCompleta.split("Responsable:")[1].split("\\|")[0].trim();
+            } catch (Exception e) { /* Ignorar */ }
+        }
+        bitacora.add(new AccionBitacora(horaActual, "[" + rol + "]", paso.getTitulo()));
+    }
+
     private List<PasoProtocolo> generarPasosParaIncidente(String titulo) {
         List<PasoProtocolo> pasos = new ArrayList<>();
-        // Usamos un switch para decidir qué lista crear
         switch (titulo) {
             case "Falla Eléctrica General":
-                pasos.add(new PasoProtocolo("Verificar fuente de alimentación", "Responsable: Equipo Técnico | Completado: 00:03:00"));
-                pasos.add(new PasoProtocolo("Inspeccionar tableros de control", "Responsable: Jefe de Operaciones | RTO Objetivo: < 15 min"));
+                pasos.add(new PasoProtocolo("Verificar fuente de alimentación", "Responsable: Equipo Técnico"));
+                pasos.add(new PasoProtocolo("Inspeccionar tableros de control", "Responsable: Jefe de Operaciones"));
                 pasos.add(new PasoProtocolo("Notificar a equipo de mantenimiento", "Responsable: Administración"));
                 pasos.add(new PasoProtocolo("Activar generador de respaldo", "Responsable: Equipo de Seguridad"));
                 pasos.add(new PasoProtocolo("Comunicar estado a la gerencia", "Responsable: Gerente General"));
@@ -149,7 +162,6 @@ public class Protocolo_Fragment extends Fragment {
                 pasos.add(new PasoProtocolo("Contactar al proveedor de servicios (ISP)", "Responsable: Administración"));
                 pasos.add(new PasoProtocolo("Informar a los usuarios sobre la interrupción", "Responsable: Jefe de Operaciones"));
                 break;
-            // Añade más 'case' para los otros tipos de incidentes
             default:
                 pasos.add(new PasoProtocolo("No se encontraron pasos", "Verifique la configuración del protocolo."));
                 break;
@@ -166,10 +178,7 @@ public class Protocolo_Fragment extends Fragment {
                 int seconds = (int) (millis / 1000);
                 int minutes = seconds / 60;
                 int hours = minutes / 60;
-                seconds = seconds % 60;
-                minutes = minutes % 60;
-
-                textViewTimer.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds));
+                textViewTimer.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes % 60, seconds % 60));
                 timerHandler.postDelayed(this, 1000);
             }
         };
@@ -179,10 +188,8 @@ public class Protocolo_Fragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Detiene el cronómetro para evitar fugas de memoria
         if (timerHandler != null && timerRunnable != null) {
             timerHandler.removeCallbacks(timerRunnable);
         }
     }
-
 }

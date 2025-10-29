@@ -139,18 +139,6 @@
                             <TextView android:text="Descripción" android:textStyle="bold"/>
                         </TableRow>
 
-                        <TableRow android:layout_marginTop="8dp">
-                            <TextView android:text="10:30"/>
-                            <TextView android:text="[Monitor]"/>
-                            <TextView android:text="Alerta de servicio principal caído."/>
-                        </TableRow>
-
-                        <TableRow android:layout_marginTop="8dp">
-                            <TextView android:text="10:32"/>
-                            <TextView android:text="[Líder]"/>
-                            <TextView android:text="Equipo de respuesta notificado."/>
-                        </TableRow>
-
                     </TableLayout>
 
                 </com.google.android.material.card.MaterialCardView>
@@ -188,7 +176,7 @@
                     android:textAllCaps="false"
                     app:backgroundTint="@color/mediumPurple"
                     app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_upload"
+                    app:icon="@drawable/arrow_upward_24px"
                     app:iconGravity="textStart" />
 
             </LinearLayout>
